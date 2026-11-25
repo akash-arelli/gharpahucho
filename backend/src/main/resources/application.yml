@@ -1,0 +1,147 @@
+spring:
+  application:
+    name: gharpahucho-backend
+  autoconfigure:
+    # Authentication is JWT only; do not create the default in-memory user with a random password.
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gharpahucho}
+    username: ${DB_USER:gharpahucho}
+    password: ${DB_PASSWORD:gharpahucho}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.jdbc.batch_size: 50
+      hibernate.order_inserts: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  # Behind a hosting platform's HTTPS proxy: trust X-Forwarded-* so same-origin browser calls are not mistaken for CORS.
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  health:
+    defaults:
+      enabled: true
+  metrics:
+    tags:
+      application: gharpahucho-backend
+      environment: ${GP_ENVIRONMENT:local}
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      # Set OTEL_TRACES_EXPORT_ENABLED=true and OTEL_EXPORTER_OTLP_TRACES_ENDPOINT to ship traces
+      # (e.g. to Jaeger, which NudgeBee can connect to as a tracing source).
+      export:
+        enabled: ${OTEL_TRACES_EXPORT_ENABLED:false}
+      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+
+logging:
+  pattern:
+    correlation: "[%X{traceId:-},%X{requestId:-}] "
+  level:
+    com.gharpahucho: INFO
+    com.flagsmith: WARN
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+gharpahucho:
+  demo:
+    enabled: ${GP_DEMO_MODE:true}
+    reset-endpoint-enabled: ${GP_DEMO_RESET_ENDPOINT:true}
+    demo-password: ${GP_DEMO_PASSWORD:demo1234}
+  security:
+    jwt-secret: ${GP_JWT_SECRET:change-me-change-me-change-me-change-me-0123456789}
+    jwt-ttl-minutes: 720
+    allowed-origins: ${GP_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8081}
+  flagsmith:
+    server-key: ${FLAGSMITH_SERVER_KEY:}
+    api-url: ${FLAGSMITH_API_URL:}
+    local-evaluation: ${FLAGSMITH_LOCAL_EVALUATION:true}
+    refresh-interval-seconds: ${FLAGSMITH_REFRESH_SECONDS:10}
+    # Safe fallbacks used ONLY when Flagsmith is not configured or unreachable.
+    # Core journeys keep working; experimental behaviour stays OFF.
+    defaults:
+      smart_trip_planner: true
+      ai_voice_trip_creation: true
+      sarvam_multilingual_assistant: true
+      travel_companion_matching: true
+      shared_ride_matching: true
+      alternative_route_recommendations: true
+      budget_optimization: true
+      travel_group_creation: true
+      experimental_matching_algorithm: false
+      ai_trip_explanations: true
+      # Paid capability. Fails OPEN when Flagsmith is unreachable so an outage never locks out paying members.
+      festival_booking_plan: true
+      ride_alerts: true
+      unlimited_ride_alerts: true
+      family_link: true
+      # Needs GP_DEMO_MODE=true as well; see BillingService.
+      demo_checkout: true
+    config-defaults:
+      rail_booking_window_days: "60"
+      free_radar_trips: "1"
+      free_ride_alerts: "1"
+      festival_pass_price_inr: "299"
+      matching_radius_km: "25"
+      date_flexibility_days: "2"
+      max_budget_deviation_pct: "20"
+      min_compatibility_score: "40"
+      max_recommendations: "12"
+      matching_weights: '{"destination":35,"date":25,"start":20,"budget":10,"transport":10}'
+  sarvam:
+    api-key: ${SARVAM_API_KEY:}
+    base-url: ${SARVAM_BASE_URL:https://api.sarvam.ai}
+    chat-model: ${SARVAM_CHAT_MODEL:sarvam-105b}
+    stt-model: ${SARVAM_STT_MODEL:saaras:v4}
+    rate-limit-per-minute: ${SARVAM_RATE_LIMIT_PER_MINUTE:20}
+  maps:
+    provider: ${MAPS_PROVIDER:osrm}
+    osrm-base-url: ${OSRM_BASE_URL:https://router.project-osrm.org}
+    google-api-key: ${GOOGLE_MAPS_API_KEY:}
+    nominatim-enabled: ${NOMINATIM_ENABLED:true}
+    cab-rate-per-km: ${CAB_RATE_PER_KM:14}
+    cab-base-fare: ${CAB_BASE_FARE:250}
+  nudgebee:
+    event-webhook-url: ${NUDGEBEE_EVENT_WEBHOOK_URL:}
+    webhook-token: ${NUDGEBEE_WEBHOOK_TOKEN:}
+    graphql-url: ${NUDGEBEE_GRAPHQL_URL:}
+    api-token: ${NUDGEBEE_API_TOKEN:}
+    service-name: ${NUDGEBEE_SERVICE_NAME:gharpahucho-backend}
+    namespace: ${NUDGEBEE_NAMESPACE:gharpahucho}
+    environment: ${GP_ENVIRONMENT:local}
+    monitor-enabled: ${NUDGEBEE_MONITOR_ENABLED:true}

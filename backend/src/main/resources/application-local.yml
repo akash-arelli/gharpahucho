@@ -1,0 +1,8 @@
+# "local" profile: runs the whole backend on an in-memory H2 database in PostgreSQL compatibility mode.
+# Use it when Docker/PostgreSQL is not available:  mvn spring-boot:run -Dspring-boot.run.profiles=local
+spring:
+  datasource:
+    url: jdbc:h2:mem:gharpahucho;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
