@@ -12,7 +12,7 @@ services:
       - key: GP_ENVIRONMENT
         value: demo
       - key: GP_DEMO_RESET_ENDPOINT
-        value: "false"
+        value: "true"   # enables one-click demo login (and demo data reset); data is throwaway
       - key: GP_JWT_SECRET
         generateValue: true
       - key: GP_ALLOWED_ORIGINS
