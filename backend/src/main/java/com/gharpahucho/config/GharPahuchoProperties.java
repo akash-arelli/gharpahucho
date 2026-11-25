@@ -28,6 +28,8 @@ public class GharPahuchoProperties {
         private boolean enabled = true;
         /** Exposes /api/demo/reset and the one-click demo login. Never enable in production. */
         private boolean resetEndpointEnabled = true;
+        /** Public demo deployments: reject e-mail/password sign-in and registration; only the one-click demo login works. */
+        private boolean demoOnly = false;
         private String demoPassword = "demo1234";
     }
 

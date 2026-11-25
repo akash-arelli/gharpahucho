@@ -17,7 +17,7 @@ export default function Landing() {
   const navigate = useNavigate()
   const [busy, setBusy] = useState(false)
 
-  const go = (path: string) => navigate(user ? path : `/register?next=${encodeURIComponent(path)}`)
+  const go = (path: string) => navigate(user ? path : `/login?next=${encodeURIComponent(path)}`)
 
   const tryDemo = async () => {
     setBusy(true)
@@ -42,14 +42,9 @@ export default function Landing() {
                 <Link to="/app">Open dashboard</Link>
               </Button>
             ) : (
-              <>
-                <Button asChild variant="ghost" size="sm">
-                  <Link to="/login">Sign in</Link>
-                </Button>
-                <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
-                  <Link to="/register">Create account</Link>
-                </Button>
-              </>
+              <Button variant="default" size="sm" onClick={tryDemo} loading={busy}>
+                Try the demo
+              </Button>
             )}
           </div>
         </div>

@@ -40,6 +40,7 @@ public class UserService {
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
+        requireNotDemoOnly();
         String email = req.email().trim().toLowerCase(Locale.ROOT);
         if (users.existsByEmailIgnoreCase(email)) {
             throw ApiException.conflict("An account with this e-mail already exists");
@@ -60,10 +61,17 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest req) {
+        requireNotDemoOnly();
         User u = users.findByEmailIgnoreCase(req.email().trim())
                 .filter(x -> encoder.matches(req.password(), x.getPasswordHash()))
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "BAD_CREDENTIALS", "Invalid e-mail or password"));
         return new AuthResponse(jwt.issue(u.getId(), u.getEmail()), Mappers.toMe(u, prefs.findByUserId(u.getId()).orElse(null)));
+    }
+
+    private void requireNotDemoOnly() {
+        if (props.getDemo().isDemoOnly()) {
+            throw ApiException.forbidden("Sign-in and sign-up are turned off in this demo. Use the demo account.");
+        }
     }
 
     /** One-click login as the seeded demo traveller. Only available while demo mode is on. */

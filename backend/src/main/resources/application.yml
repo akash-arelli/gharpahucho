@@ -82,6 +82,7 @@ gharpahucho:
   demo:
     enabled: ${GP_DEMO_MODE:true}
     reset-endpoint-enabled: ${GP_DEMO_RESET_ENDPOINT:true}
+    demo-only: ${GP_DEMO_ONLY:false}
     demo-password: ${GP_DEMO_PASSWORD:demo1234}
   security:
     jwt-secret: ${GP_JWT_SECRET:change-me-change-me-change-me-change-me-0123456789}
